@@ -27,7 +27,7 @@ imgaug
 timm
 imgkit
 pycocotools
-./procrustes
+../procrustes
 ml_collections
 shapely
 pygifsicle
@@ -35,9 +35,9 @@ imageio[ffmpeg]
 tensorboard
 einops
 
--e ../killeengeo
--e "../deepdrr[cuda11x,dev]"
--e ../perphix # TODO point to git repo
+-e /home/sampath/killeengeo
+-e "/home/sampath/deepdrr[cuda11x,dev]"
+#-e ../perphix # TODO point to git repo
 
 
 # development

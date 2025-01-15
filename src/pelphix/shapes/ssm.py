@@ -74,7 +74,10 @@ class StatisticalShapeModel(object):
             faces = np.hstack([np.ones((faces.shape[0], 1), dtype=int) * 3, faces])
 
         mesh = pv.PolyData(points, faces)
-        if not mesh.is_all_triangles():
+        log.info(f'init the, {mesh}')
+        log.info(type(mesh.is_all_triangles))
+        log.info(mesh.is_all_triangles)
+        if not mesh.is_all_triangles:
             mesh = mesh.triangulate()
 
         # Gets rid of pad points

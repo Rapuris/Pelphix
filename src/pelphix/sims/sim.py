@@ -33,7 +33,7 @@ from queue import Empty
 import pyvista as pv
 from omegaconf import OmegaConf
 
-from perphix.data import PerphixBase
+#from perphix.data import PerphixBase
 
 from .base import PelphixBase, Case, ImageSize
 from .state import Task, Activity, Acquisition, Frame, SimState, FrameState
