@@ -27,7 +27,8 @@ experiment:
   skip_download: ${skip_download}
 
 onedrive_dir: ~/datasets/OneDrive
-nmdid_dir: sambhav/NMDID-ARCADE
+nmdid_dir: /data1/sampath 
+#sambhav/NMDID-ARCADE
 pelvis_annotations_dir: 2023-03-12_pelvis-annotations_ssm
 skip_download: True
 num_workers: 0
@@ -53,9 +54,9 @@ _wire_angulation_max: 45
 
 # Generating the Pelphix dataset.
 sim:
-  root: ${onedrive_dir}/datasets/Pelphix
+  root: $/data1/sampath/Pelphix
   nmdid_root: ${onedrive_dir}/${nmdid_dir}
-  pelvis_annotations_dir: ${onedrive_dir}/${nmdid_dir}/${pelvis_annotations_dir}
+  pelvis_annotations_dir: /data1/sampath/2023-03-12_pelvis-annotations_ssm
   num_val: 10
   scan_name: THIN_BONE_TORSO
   image_size:

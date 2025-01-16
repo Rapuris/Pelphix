@@ -3,6 +3,9 @@ import logging
 import math
 import multiprocessing as mp
 import os
+import sys
+sys.path.append('/data1/sampath/prephixSynth/src')
+from prephix.data.handlers.utils import segment_ct_3
 from pathlib import Path
 
 from typing import Optional, List, Any, Tuple
@@ -44,29 +47,59 @@ def pelvis_ssm_build(cfg : DictConfig):
         pelvis_annotations_dir.mkdir(parents=True)
         
     mesh_dir = Path("/data1/sampath/TotalSegmentator_mesh/cad_rep_id_csv_sr")
+    nifti_dir = Path('/data1/bohua/NMDID-ARCADE/nifti/cad_rep_id_csv_sr')
 
     # Outputs
     pelvis_mesh_paths = []  # List of [hip_left_path, hip_right_path, sacrum_path]
     pelvis_case_names = []  # List of case directory names
 
     # Iterate through each case directory
-    for case_dir in mesh_dir.iterdir():
+    #for case_dir in mesh_dir.iterdir():
+    #    if not case_dir.is_dir():
+    #        continue  # Skip non-directory files
+#
+    #    # Paths to the required mesh files
+    #    hip_left_path = case_dir / "hip_left.stl"
+    #    hip_right_path = case_dir / "hip_right.stl"
+    #    sacrum_path = case_dir / "sacrum.stl"
+#
+    #    # Ensure all required meshes exist
+    #    if not hip_left_path.exists() or not hip_right_path.exists() or not sacrum_path.exists():
+    #        log.error(f"Missing one or more required meshes in {case_dir} (skipping)")
+    #        continue
+#
+    #    # Append valid paths to the list
+    #    pelvis_mesh_paths.append([hip_left_path, hip_right_path, sacrum_path])
+    #    pelvis_case_names.append(case_dir.name)
+    
+    for case_dir in nifti_dir.iterdir():
         if not case_dir.is_dir():
             continue  # Skip non-directory files
 
-        # Paths to the required mesh files
-        hip_left_path = case_dir / "hip_left.stl"
-        hip_right_path = case_dir / "hip_right.stl"
-        sacrum_path = case_dir / "sacrum.stl"
+        case_name = case_dir.name
+        ct_path = case_dir / f"{case_dir}.nii.gz"  # Adjust filename as needed
 
-        # Ensure all required meshes exist
-        if not hip_left_path.exists() or not hip_right_path.exists() or not sacrum_path.exists():
-            log.error(f"Missing one or more required meshes in {case_dir} (skipping)")
-            continue
+        # Check if the case_name exists in mesh_dir
+        mesh_case_dir = mesh_dir / case_name
+        if mesh_case_dir.exists() and mesh_case_dir.is_dir():
+            # Paths to the required mesh files
+            hip_left_path = mesh_case_dir / "hip_left.stl"
+            hip_right_path = mesh_case_dir / "hip_right.stl"
+            sacrum_path = mesh_case_dir / "sacrum.stl"
 
-        # Append valid paths to the list
-        pelvis_mesh_paths.append([hip_left_path, hip_right_path, sacrum_path])
-        pelvis_case_names.append(case_dir.name)
+            # Ensure all required meshes exist
+            if hip_left_path.exists() and hip_right_path.exists() and sacrum_path.exists():
+                pelvis_mesh_paths.append([hip_left_path, hip_right_path, sacrum_path])
+                pelvis_case_names.append(case_name)
+            else:
+                log.error(f"Missing one or more required meshes in {mesh_case_dir} (skipping)")
+        else:
+            # Case not found in mesh_dir, call segment_ct_3
+            if ct_path.exists():
+                log.info(f"Case {case_name} not found in mesh_dir. Segmenting...")
+                segment_ct_3(ct_path = ct_path, case_id = case_name, root_dir = None)
+            else:
+                log.error(f"CT file not found for case {case_name} in {ct_path} (skipping)")
 
     log.info(f"Processed {len(pelvis_mesh_paths)} cases successfully.")
     # Iterate through all synthetic CT meshes

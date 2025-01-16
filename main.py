@@ -28,7 +28,7 @@ import imageio
 # Nosort
 import deepdrr
 import pelphix
-from pelphix.utils.onedrive_utils import OneDrive
+#from pelphix.utils.onedrive_utils import OneDrive
 from pelphix.ssm import ssm_build
 from pelphix.sims import PelphixSim
 from perphix.data import (
@@ -83,15 +83,16 @@ def generate(cfg):
     """Generate the sequence dataset."""
     mp.set_start_method("spawn", force=True)
     # Check that the CTs/annotations are downloaded
-    onedrive = OneDrive(cfg.onedrive_dir)
+    #onedrive = OneDrive(cfg.onedrive_dir)
     nmdid_dir = Path(cfg.nmdid_dir).expanduser()
-    for d in ["nifti", "TotalSegmentator", "TotalSegmentator_mesh", cfg.pelvis_annotations_dir]:
-        onedrive.download(nmdid_dir / d, skip=cfg.skip_download)
+    #for d in ["nifti", "TotalSegmentator", "TotalSegmentator_mesh", cfg.pelvis_annotations_dir]:
+    #    onedrive.download(nmdid_dir / d, skip=cfg.skip_download)
 
     sim_config = OmegaConf.to_container(cfg.sim)
 
     # Generate the images
     if not cfg.eval_only:
+        log.info(sim_config)
         pelphix_sim = PelphixSim(train=True, **sim_config)
         pelphix_sim.generate()
 
