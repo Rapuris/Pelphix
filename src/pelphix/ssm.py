@@ -5,7 +5,7 @@ import multiprocessing as mp
 import os
 import sys
 sys.path.append('/data1/sampath/prephixSynth/src')
-from prephix.data.handlers.utils import segment_ct_3
+from prephix.data.handlers.utils import segment_ct_3, segment_ct_total_mr
 from pathlib import Path
 
 from typing import Optional, List, Any, Tuple
@@ -77,8 +77,10 @@ def pelvis_ssm_build(cfg : DictConfig):
             continue  # Skip non-directory files
 
         case_name = case_dir.name
-        ct_path = case_dir / f"{case_dir}.nii.gz"  # Adjust filename as needed
-
+        ct_path = case_dir / f"{case_name}.nii.gz"  # Adjust filename as needed
+        #log.info(ct_path)
+        #log.info(case_dir)
+        #log.info(case_name)
         # Check if the case_name exists in mesh_dir
         mesh_case_dir = mesh_dir / case_name
         if mesh_case_dir.exists() and mesh_case_dir.is_dir():
@@ -92,12 +94,14 @@ def pelvis_ssm_build(cfg : DictConfig):
                 pelvis_mesh_paths.append([hip_left_path, hip_right_path, sacrum_path])
                 pelvis_case_names.append(case_name)
             else:
-                log.error(f"Missing one or more required meshes in {mesh_case_dir} (skipping)")
+                if ct_path.exists():
+                    log.info(f"Case {case_name} meshes are missing. Segmenting...")
+                    segment_ct_total_mr(ct_path = ct_path, case_id = case_name, root_dir = None)
         else:
             # Case not found in mesh_dir, call segment_ct_3
             if ct_path.exists():
                 log.info(f"Case {case_name} not found in mesh_dir. Segmenting...")
-                segment_ct_3(ct_path = ct_path, case_id = case_name, root_dir = None)
+                segment_ct_total_mr(ct_path = ct_path, case_id = case_name, root_dir = None)
             else:
                 log.error(f"CT file not found for case {case_name} in {ct_path} (skipping)")
 
