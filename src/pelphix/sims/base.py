@@ -107,7 +107,7 @@ class PelphixBase(PerphixBase, Process):
             dict[str, geo.Point3D]: The pelvis keypoints in world coordinates.
 
         """
-        ct_dir = Path("/data1/sampath/nifti")#self.nmdid_root / "nifti" / self.scan_name / case_name
+        ct_dir = Path("/nfs/centipede/sampath/nifti")#self.nmdid_root / "nifti" / self.scan_name / case_name
         ct_paths = list(ct_dir.glob("*.nii.gz"))
         if not ct_paths:
             raise ValueError(f"Could not find CT for case {case_name}")

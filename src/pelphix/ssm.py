@@ -3,9 +3,6 @@ import logging
 import math
 import multiprocessing as mp
 import os
-import sys
-sys.path.append('/data1/sampath/prephixSynth/src')
-from prephix.data.handlers.utils import segment_ct_3, segment_ct_total_mr
 from pathlib import Path
 
 from typing import Optional, List, Any, Tuple
@@ -32,22 +29,22 @@ def pelvis_ssm_build(cfg : DictConfig):
     log.info("----------------- Propagating hip annotations -----------------")
 
     # Load SSM annotations
-    pelvis_ssm_annotation_dir = Path('/data1/sampath/pelphix/data/annotations_pelvis_ssm_0337-meshes_010k-pts_40-comps')
+    pelvis_ssm_annotation_dir = Path('/nfs/centipede/sampath/Pelphix/data/annotations_pelvis_ssm_0337-meshes_010k-pts_40-comps')
     if not pelvis_ssm_annotation_dir.exists():
         log.info(f"No annotations found at {pelvis_ssm_annotation_dir}")
         exit()
-    pelvis_ssm_path = Path('/data1/sampath/pelphix/data/pelvis_ssm_0337-meshes_010k-pts_40-comps.npz')
+    pelvis_ssm_path = Path('/nfs/centipede/sampath/Pelphix/data/pelvis_ssm_0337-meshes_010k-pts_40-comps.npz')
     pelvis_ssm = StatisticalShapeModel.from_npz(pelvis_ssm_path)
     pelvis_ssm.read_annotations(pelvis_ssm_annotation_dir)
     log.debug(f"Loaded {len(pelvis_ssm.annotations)} annotations from {pelvis_ssm_annotation_dir}")
 
     # Create output directory for propagated annotations
-    pelvis_annotations_dir: Path = Path("/data1/sampath/SynthPelvisAnnotations")
+    pelvis_annotations_dir: Path = Path("/nfs/centipede/sampath/RealPelvisAnnotations")
     if not pelvis_annotations_dir.exists():
         pelvis_annotations_dir.mkdir(parents=True)
         
-    mesh_dir = Path("/data1/sampath/TotalSegmentator_mesh/cad_rep_id_csv_sr")
-    nifti_dir = Path('/data1/bohua/NMDID-ARCADE/nifti/cad_rep_id_csv_sr')
+    mesh_dir = Path("/nfs/centipede/sampath/TotalSegmentator_mesh/FULL_BODY_COMBINED")
+    nifti_dir = Path('/nfs/centipede/sampath/nifti/FULL_BODY_COMBINED')
 
     # Outputs
     pelvis_mesh_paths = []  # List of [hip_left_path, hip_right_path, sacrum_path]
@@ -83,6 +80,7 @@ def pelvis_ssm_build(cfg : DictConfig):
         #log.info(case_name)
         # Check if the case_name exists in mesh_dir
         mesh_case_dir = mesh_dir / case_name
+        #log.info(mesh_case_dir)
         if mesh_case_dir.exists() and mesh_case_dir.is_dir():
             # Paths to the required mesh files
             hip_left_path = mesh_case_dir / "hip_left.stl"
@@ -95,13 +93,13 @@ def pelvis_ssm_build(cfg : DictConfig):
                 pelvis_case_names.append(case_name)
             else:
                 if ct_path.exists():
-                    log.info(f"Case {case_name} meshes are missing. Segmenting...")
-                    segment_ct_total_mr(ct_path = ct_path, case_id = case_name, root_dir = None)
+                    log.error(f"Case {case_name} meshes are missing")
+                    #segment_ct_total_mr(ct_path = ct_path, case_id = case_name, root_dir = None)
         else:
             # Case not found in mesh_dir, call segment_ct_3
             if ct_path.exists():
-                log.info(f"Case {case_name} not found in mesh_dir. Segmenting...")
-                segment_ct_total_mr(ct_path = ct_path, case_id = case_name, root_dir = None)
+                log.error(f"Case {case_name} not found in mesh_dir. Segmenting...")
+                #segment_ct_total_mr(ct_path = ct_path, case_id = case_name, root_dir = None)
             else:
                 log.error(f"CT file not found for case {case_name} in {ct_path} (skipping)")
 
@@ -165,11 +163,11 @@ def hip_ssm_build(cfg: DictConfig):
     log.info("----------------- Propagating hip landmarks -----------------")
 
     # Load SSM annotations
-    ssm_annotation_dir = Path('/data1/sampath/pelphix/data/annotations_hip_ssm_0674-meshes_005k-pts_40-comps')
+    ssm_annotation_dir = Path('/nfs/centipede/sampath/Pelphix/data/annotations_hip_ssm_0674-meshes_005k-pts_40-comps')
     if not ssm_annotation_dir.exists():
         log.info(f"No annotations found at {ssm_annotation_dir}")
         exit()
-    hip_ssm = StatisticalShapeModel.from_npz(Path('/data1/sampath/pelphix/data/hip_ssm_0674-meshes_005k-pts_40-comps.npz'))
+    hip_ssm = StatisticalShapeModel.from_npz(Path('/nfs/centipede/sampath/Pelphix/data/hip_ssm_0674-meshes_005k-pts_40-comps.npz'))
     hip_ssm.read_annotations(ssm_annotation_dir)
     if not "R_landmarks" in hip_ssm.annotations:
         log.debug(f"Annotations: {hip_ssm.annotations.keys()}")
@@ -177,13 +175,13 @@ def hip_ssm_build(cfg: DictConfig):
         exit()
 
     # Set up output directory for annotations
-    annotations_dir = Path("/data1/sampath/SynthHipAnnotations")
+    annotations_dir = Path("/nfs/centipede/sampath/RealHipAnnotations")
     if not annotations_dir.exists():
         annotations_dir.mkdir(parents=True)
 
 
     # Directory containing case subdirectories
-    base_dir = Path("/data1/sampath/TotalSegmentator_mesh/cad_rep_id_csv_sr")
+    base_dir = Path("/nfs/centipede/sampath/TotalSegmentator_mesh/FULL_BODY_COMBINED")
 
     # Outputs
     hip_paths: list[Path] = []  # Paths to hip_left.stl and hip_right.stl
